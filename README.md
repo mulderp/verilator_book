@@ -1,23 +1,29 @@
-# Initial page
+# Verilator overview
 
-## Getting Super Powers
+## Welcome
 
-Becoming a super hero is a fairly straight forward process:
+Verilator is a tool to simulate and design digital circuits.
 
 ```
-$ give me super-powers
+$ verilator
+Usage:
+        verilator --help
+        verilator --version
+        verilator --cc [options] [source_files.v]... [opt_c_files.cpp/c/cc/a/o/so]
+        verilator --sc [options] [source_files.v]... [opt_c_files.cpp/c/cc/a/o/so]
+        verilator --lint-only -Wall [source_files.v]...
 ```
 
 {% hint style="info" %}
- Super-powers are granted randomly so please submit an issue if you're not happy with yours.
+ Verilator runs on Unix and with Mingsys on Windows. 
 {% endhint %}
 
 Once you're strong enough, save the world:
 
 {% code title="hello.sh" %}
 ```bash
-# Ain't no code for that yet, sorry
-echo 'You got to trust me on this, I saved the world'
+# This will be a simple wrapper script.
+
 ```
 {% endcode %}
 
