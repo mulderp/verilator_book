@@ -18,7 +18,7 @@ Usage:
  Verilator runs on Unix and with Mingsys on Windows. 
 {% endhint %}
 
-Once you're strong enough, save the world:
+Verilator will compile verilog files into C++ .
 
 {% code title="hello.sh" %}
 ```bash
@@ -26,6 +26,28 @@ Once you're strong enough, save the world:
 
 ```
 {% endcode %}
+
+## Testbench
+The test bench provided for Verilator would need to be in C++, or a FSM in Verilog. 
+
+## Compiling a design
+
+Modules are the basic building blocks of a Verilog design. You can put multiple modules per file.
+
+You'd write this in C code, for example in = 0; 
+
+then make time pass and call 
+
+{% code title="tb.cc" %}
+```
+topp->eval(), 
+```
+{% endcode %}
+     
+then print the value.
+
+
+## Simulating a design
 
 
 
