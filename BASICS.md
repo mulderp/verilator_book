@@ -11,20 +11,19 @@ module hello_tb;
 
   reg clk;
 
-  parameter N_cycles = 20;
-  parameter pulse_width = 5;
+  parameter N_CYCLES = 20;
+  parameter PULSE_WIDTH = 5;
   integer j;
 
   initial begin
    clk <= 0;
-   for (j=0; j<N_cycles; j = j + 1)
-      #pulse_width clk <= ~clk;
+   for (j=0; j<N_CYCLES; j = j + 1)
+      #PULSE_WIDTH clk <= ~clk;
   end
 
   always @(posedge clk) begin
     $display("tick");
   end
-
 
 endmodule
 ```
@@ -57,7 +56,7 @@ Usage:
 ```
 
 
-Verilator will compile verilog files into C++ .
+Verilator will compile Verilog files into C++.
 
 {% code title="hello.sh" %}
 ```bash

@@ -1,8 +1,9 @@
 # Verilator overview
 
+The aim of this book is to explore Verilator to learn and experiment with digital circuits. This book can also be read online at [gitbooks](https://mulder-patrick.gitbook.io/verilator/).
 
-Verilator is a compiler that let you compile C++ and Verilog code to do simulations.
-Using C++ can be helpful to introduce new abstractions and speed up simulation time. The aim of this book however is to explore Verilator to learn and experiment with digital circuits. This book can also be read online at [gitbooks](https://mulder-patrick.gitbook.io/verilator/)
+Verilator is a compiler that let you compile Verilog code into C++ to do simulations.
+Using C++ can be helpful to introduce new abstractions and speed up simulation time.
 
 ## Learning Verilog
 
@@ -32,7 +33,7 @@ Besides Verilog, VHDL can be useful to know when designing digital systems. We w
 The Verilator repository can be found [here](https://github.com/verilator/verilator)
 
 {% hint style="info" %}
- Verilator runs on Unix and with Mingsys on Windows. 
+ Verilator runs on Linux, and with Mingsys on Windows. 
 {% endhint %}
 
 Good places to start learning Verilator are also:
