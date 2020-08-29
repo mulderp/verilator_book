@@ -47,3 +47,16 @@ Usage:
         verilator --sc [options] [source_files.v]... [opt_c_files.cpp/c/cc/a/o/so]
         verilator --lint-only -Wall [source_files.v]...
 ```
+
+## Installing SystemC
+
+For building systems with Verilator installing SystemC is a good idea.
+You can download the package from [Accellera SysemC Github repo](https://github.com/accellera-official/systemc)
+
+```
+  cd build/
+  cmake -G Ninja ..
+  ninja all
+  sudo ninja all
+```
+
