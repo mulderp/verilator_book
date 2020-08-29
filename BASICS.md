@@ -45,6 +45,29 @@ tick
 
 The system under test is very simple. Parts of this setup can be done with C++, but Verilator doesn't have the same ways to generate events. Clocks are driven in from the SystemC or C++ wrapper, or derived with logic from clocks from SystemC or C++.
 
+As parts of the demo testbench above will be replaced with Verilator, let`s extract a simpler module with a clock event:
+
+```
+module hello(input clk);
+
+  integer i;
+
+  always @(posedge clk) begin
+    $display("tick");
+  end
+
+  initial begin
+  for (i = 0; i < 20; i = i + 1)
+    $display("tick");
+
+  $finish;
+  end
+
+endmodule
+```
+
+## Building Systems with Verilator
+
 
 To compile with SystemC and C++, we can use this CMakeLists.txt build definition:
 
@@ -158,121 +181,4 @@ module counter0 ( input   clk,
   end
 endmodule
 ```
-
-To test this counter you can take the following testbench:
-
-```
-module counter_tb;
-
-  reg clk;
-
-  parameter N_CYCLES = 20;
-  parameter PULSE_WIDTH = 5;
-
-  integer j;
-
-  initial begin
-   clk <= 0;
-   for (j=0; j<N_CYCLES; j = j + 1)
-      #PULSE_WIDTH clk <= ~clk;
-  end
-
-  initial begin
-    $dumpfile("waves.vcd");
-    $dumpvars();
-
-  end
-
-  // counter setup
-  reg counter_rstn_tb;
-  reg counter_en_tb;
-  wire [3:0] counter_n_tb;
-
-  counter0 u0(
-     .clk(clk),
-     .rstn(counter_rstn_tb),
-     .en(counter_en_tb),
-     .out(counter_n_tb)
-  );
-
- initial begin
-     counter_en_tb <= 0;
-     counter_rstn_tb <= 0;
-     #4 counter_rstn_tb <= 1;
-     #8 counter_en_tb <= 0;
-     #10 counter_en_tb <= 1;
-     #20 counter_en_tb <= 1;
-  end
-
-endmodule
-```
-
-When you elaborate the design and look at the waveforms you should be able to see waveforms like this:
-
-[image](images/count_image.png)
-
-## A first look at Verilator
-
-Verilator will compile Verilog files into C++.  This means we can load the counter module into C++. To do this, you have to "verilate" the counter.
-
-```
-$ verilator -cc src/counter0.v 
-
-```
-
-```
-$ tree obj_dir/
-obj_dir/
-├── Vcounter0_classes.mk
-├── Vcounter0.cpp
-├── Vcounter0.h
-├── Vcounter0.mk
-├── Vcounter0__Syms.cpp
-├── Vcounter0__Syms.h
-├── Vcounter0__ver.d
-└── Vcounter0__verFiles.dat
-```
-
-
-The Verilog code can now be imported into a C++ testbench:
-
-```
-include            "Vour.h"#
-include            "verilated.h"
-int            main(int            argc,            char**            argv,            char**            env)            {
-  Verilated::commandArgs(argc,            argv);
-  Vour*            top            =            new            Vour;
-
-
-
-{% code title="hello.sh" %}
-```bash
-# This will be a simple wrapper script.
-
-```
-{% endcode %}
-
-## Testbench
-The test bench provided for Verilator would need to be in C++, or a FSM in Verilog. 
-
-## Compiling a design
-
-Modules are the basic building blocks of a Verilog design. You can put multiple modules per file.
-
-You'd write this in C code, for example in = 0; 
-
-then make time pass and call 
-
-{% code title="tb.cc" %}
-```
-topp->eval(), 
-```
-{% endcode %}
-     
-then print the value.
-
-
-## Simulating a design
-
-
 
