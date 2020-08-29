@@ -2,6 +2,15 @@
 
 ## Linux
 
+Verilator comes as binary package on many Linux distributions. So, this should work:
+
+    # apt-get install verilator
+
+Or, on RPM based package managers:
+
+    # zypper install verilator
+
+
 ## Msys under Windows
 
 You can install with the gcc toolchain on Windows:
@@ -25,6 +34,16 @@ If you want to build it from source, you can follow the method used in the PKGBU
         --host=${MINGW_CHOST}
     
     make
-    
 
 
+When you have installed Verilator succesfully you should be able to see this output:
+
+```
+$ verilator
+Usage:
+        verilator --help
+        verilator --version
+        verilator --cc [options] [source_files.v]... [opt_c_files.cpp/c/cc/a/o/so]
+        verilator --sc [options] [source_files.v]... [opt_c_files.cpp/c/cc/a/o/so]
+        verilator --lint-only -Wall [source_files.v]...
+```
