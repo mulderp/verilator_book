@@ -45,26 +45,6 @@ tick
 
 The system under test is very simple. Parts of this setup can be done with C++, but Verilator doesn't have the same ways to generate events. Clocks are driven in from the SystemC or C++ wrapper, or derived with logic from clocks from SystemC or C++.
 
-As parts of the demo testbench above will be replaced with Verilator, let`s extract a simpler module with a clock event:
-
-```
-module hello(input clk);
-
-  integer i;
-
-  always @(posedge clk) begin
-    $display("tick");
-  end
-
-  initial begin
-  for (i = 0; i < 20; i = i + 1)
-    $display("tick");
-
-  $finish;
-  end
-
-endmodule
-```
 
 ## Building Systems with Verilator
 
