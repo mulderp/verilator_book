@@ -171,7 +171,34 @@ You should be able to see 20 clock cycles and the resulting count value.
 
 ## A counter varation
 
-We can make the system under test a bit more interesting if we add an asynchronous reset.
+We can make the system under test a bit more interesting. First instead of having all structures defined in one module (which is unlikely in a real project), you can add a top module as follows:
+
+``` 
+../src/hello.v 
+
+module hello(input clk, 
+             input resetn,
+             output [7:0] y);
+
+
+  initial begin
+    $dumpfile("waves.vcd");
+    $dumpvars();
+  end
+
+  // device under test
+  counter u0(clk, resetn, y);
+
+  always @ (posedge clk) begin
+    if (y == 8'h10)
+      $finish();
+  end
+
+endmodule
+```
+
+You see already that we added a new signal to control the module reset. Also the top module can be a good place to define conditiions on when to finish the simulation.
+
 
 ```
 module counter(input clk, 
@@ -185,21 +212,15 @@ module counter(input clk,
       n <= 0;
     else
       n <= n + 1;
-
-    if (n == 20)
-      $finish();
   end
 
   assign y = n;
-
-
 
 
 endmodule
 
 ```
 
-Also, we can finish the simulation after we have reach a certain count value.
 
 
 
