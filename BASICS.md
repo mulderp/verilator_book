@@ -174,64 +174,28 @@ You should be able to see 20 clock cycles and the resulting count value.
 We can make the system under test a bit more interesting if we add an asynchronous reset.
 
 ```
-#include "verilated.h"
-#include "Vhello.h"
+module counter(input clk, 
+             input resetn,
+             output [7:0] y);
 
-//#include <sysc/communication/sc_clock.h>
-//#include <sysc/kernel/sc_externs.h>
+  reg [7:0] n;
 
-void wait_n_cycles(int n);
+  always @(posedge clk) begin
+    if (resetn == 1'b0)
+      n <= 0;
+    else
+      n <= n + 1;
 
-// Current simulation time (64-bit unsigned)
-vluint64_t main_time = 0;
-// Called by $time in Verilog
-double sc_time_stamp() {
-    return main_time;  // Note does conversion to real, to match SystemC
-}
+    if (n == 20)
+      $finish();
+  end
 
-int main(int argc, char ** argv) {
-
-  Verilated::commandArgs(argc, argv);
-
-  Verilated::traceEverOn(true);
-
-  //sc_core::sc_clock clk("clk", 10, 0.6, 3, true);
-
-  Vhello* top = new Vhello();
-
-  top->resetn = 0;
-  
-
-  while (!Verilated::gotFinish()) { 
-
-    // release reset
-    if (main_time > 15) {
-      top->resetn = 1;
-    }
+  assign y = n;
 
 
-    top->clk = 1;
-    wait_n_cycles(1000);
-    top->eval(); 
 
-    top->clk = 0;
-    wait_n_cycles(1000);
-    top->eval(); 
 
-  }
-
-  delete top;
-
-  exit(0);
-
-}
-
-void wait_n_cycles(int n) {
-  for (int i = 0; i < n; i++) { 
-    main_time++;
-  
-  }
-}
+endmodule
 
 ```
 
