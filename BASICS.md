@@ -28,7 +28,7 @@ module hello_tb;
 endmodule
 ```
 
-You can compile and run this module with iverilog for example:
+This module only drives a clock signal which can be used to test a digital system. You can compile and run this module with iverilog for example:
 
 ```
 $ iverilog -o hello_tb src/hello_tb.v
@@ -43,13 +43,91 @@ tick
 ...
 ```
 
-The system under test is very simple. Parts of this setup can be done with C++, but Verilator doesn't have the same ways to generate events. Clocks are driven in from the SystemC or C++ wrapper, or derived with logic from clocks from SystemC or C++.
+The system under test is very simple as our main focus at this stage is to study how parts of this setup can be written with C++.
 
 
 ## Building Systems with Verilator
 
+The example above uses the square symbol (\#) to implement pulses. Verilog code that shall be translated to C++ (or "verilated" code) would not be able to process these delays in Verilog. Therefore let's remove the clock generator from Verilog.  It will be addressed later in C++.
 
-To compile with SystemC and C++, we can use this CMakeLists.txt build definition:
+To make the system under test a bit more interesting, we can add a counting action: To track the variables with digital waveforms, the Verilog dumpfile and dumpvar tasks are inserted. The resulting module is:
+
+```
+module hello(input clk, output [7:0] y);
+
+  reg [7:0] n;
+
+  initial begin
+    $dumpfile("waves.vcd");
+    $dumpvars();
+    n = 8'h0;
+  end
+
+  always @(posedge clk) begin
+    $display("tick");
+    n <= n + 1;
+  end
+
+  assign y = n;
+
+endmodule
+```
+
+The next step is to setup the C++ code that drives this device under test (or DUT).
+
+In Verilator, clocks can be generated with C++ or with SystemC. One possiblity to drive the module is as follows:
+
+```
+#include "verilated.h"
+#include "Vhello.h"
+
+void wait_n_cycles(int n);
+
+// Keep track of simulation time (64-bit unsigned)
+vluint64_t main_time = 0;
+
+// Called by $time in Verilog an needed to trace waveforms
+double sc_time_stamp() {
+    return main_time;  // Note does conversion to real, to match SystemC
+}
+
+int main(int argc, char ** argv) {
+
+  Verilated::commandArgs(argc, argv);
+
+  Verilated::traceEverOn(true);
+
+  Vhello* top = new Vhello();
+
+  // Simulate 20 clock cycles
+  for (int n = 0; n < 20; n++) {
+    top->clk = 1;
+    wait_n_cycles(1000);
+    top->eval(); 
+
+    top->clk = 0;
+    wait_n_cycles(1000);
+    top->eval(); 
+
+    main_time++;  
+  }
+
+  delete top;
+
+  exit(0);
+
+}
+
+void wait_n_cycles(int n) {
+  for (int i = 0; i < n; i++) { 
+    main_time++;
+  }
+}
+
+```
+
+
+To compile with SystemC and C++, we can use CMake with this CMakeLists.txt build definition:
 
 ```
 cmake_minimum_required(VERSION 3.15)
@@ -57,58 +135,11 @@ cmake_minimum_required(VERSION 3.15)
 project(counter_tb)
 find_package(verilator HINTS $ENV{VERILATOR_ROOT})
 
-include_directories("/opt/systemc/include")
-
 add_executable(Vhello hello.cc)
 
 verilate(Vhello SOURCES src/hello.v)
-verilator_link_systemc(Vhello)
 ```
 
-With the following Verilog:
-
-```
-module hello(input clk);
-
-  integer i;
-
-  always @(posedge clk) begin
-    $display("tick");
-  end
-
-  initial begin
-  for (i = 0; i < 20; i = i + 1)
-    $display("tick0");
-  $finish();
-  end
-
-endmodule
-```
-
-Last we need a C++ testbench:
-
-```
-#include "verilated.h"
-
-#include <sysc/communication/sc_clock.h>
-#include <sysc/kernel/sc_externs.h>
-
-int sc_main(int argc, char ** argv) {
-
-  Verilated::commandArgs(argc, argv);
-
-  sc_core::sc_clock clk("clk", 10, 0.6, 3, true);
-
-  Vhello* top = new Vhello();
-
-  while (!Verilated::gotFinish()) { top->eval(); }
-
-  delete top;
-
-  exit(0);
-
-}
-```
 
 Now compile all with:
 
@@ -123,15 +154,6 @@ You should be able to run the example and see:
 
 ```
 > ./Vhello
-
-        SystemC 2.3.4_pub_rev_20191203-Accellera --- Aug 29 2020 13:00:14
-        Copyright (c) 1996-2019 by all Contributors,
-        ALL RIGHTS RESERVED
-
-Info: (I804) /IEEE_Std_1666/deprecated:
-    sc_clock(const char*, double, double, double, bool)
-    is deprecated use a form that includes sc_time or
-    sc_time_unit
 tick
 tick
 ...
@@ -139,15 +161,23 @@ tick
 - src/hello.v:14: Verilog $finish
 ```
 
-## A counter example
+Besides the console output of clock ticks, you should have a waveform file which can be loaded with gitkwave:
 
-We can make the system under test a bit more interesting if we add a counter with an asynchronous reset.
+```
+$ gtkwave waves.vcd
+```
+
+You should be able to see 20 clock cycles and the resulting count value.
+
+## A counter varation
+
+We can make the system under test a bit more interesting if we add an asynchronous reset.
 
 ```
 module counter0 ( input   clk,
                   input   rstn,
                   input   en,
-                  output  reg [3:0] out);
+                  output  reg [8:0] out);
 
   always @ (posedge clk, negedge rstn) begin
     if (!rstn) begin
@@ -162,3 +192,7 @@ module counter0 ( input   clk,
 endmodule
 ```
 
+Also, we can finish the simulation after we have reach a certain count value.
+
+
+This reset could be driven from the testbench as follows
